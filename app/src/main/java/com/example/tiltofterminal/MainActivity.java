@@ -1,0 +1,111 @@
+package com.example.tiltofterminal;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
+
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    SensorManager mSensorManager;
+    TextView textView,textView2,textView3;
+    float accX, accY, accZ;
+    float gyroX, gyroY, gyroZ;
+    float rvX, rvY, rvZ;
+    Intent intent2, intent3;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        textView = findViewById(R.id.text_view);
+        textView2 = findViewById(R.id.text_view2);
+        textView3 = findViewById(R.id.text_view3);
+
+        intent2 = new Intent(this,MainActivity2.class);
+        intent3 = new Intent(this,MainActivity3.class);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Sensor accel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor gyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        Sensor rv = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        mSensorManager.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, rv, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        switch(sensorEvent.sensor.getType()){
+            case Sensor.TYPE_ACCELEROMETER:
+                accX = sensorEvent.values[0];
+                accY = sensorEvent.values[1];
+                accZ = sensorEvent.values[2];
+
+                String acc = "Accelerometer\n"
+                        + " X: " + accX + "\n"
+                        + " Y: " + accY + "\n"
+                        + " Z: " + accZ;
+                textView.setText(acc);
+                break;
+            case Sensor.TYPE_GYROSCOPE:
+                gyroX = sensorEvent.values[0];
+                gyroY = sensorEvent.values[1];
+                gyroZ = sensorEvent.values[2];
+
+                String gyro = "Gyro\n"
+                        + " X: " + gyroX + "\n"
+                        + " Y: " + gyroY + "\n"
+                        + " Z: " + gyroZ;
+                textView2.setText(gyro);
+                Log.d("test", "onSensorChanged: \n" + "X:" + gyroX + "\n"+ "Y:" + gyroY + "\n"+ "Z:" + gyroZ + "\n");
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
+                rvX = sensorEvent.values[0];
+                rvY = sensorEvent.values[1];
+                rvZ = sensorEvent.values[2];
+
+                String rv = "RotationVector\n"
+                        + " X: " + rvX + "\n"
+                        + " Y: " + rvY + "\n"
+                        + " Z: " + rvZ;
+                textView3.setText(rv);
+                Log.d("test", "onSensorChanged: \n" + "X:" + rvX + "\n"+ "Y:" + rvY + "\n"+ "Z:" + rvZ + "\n");
+                break;
+        }
+
+        if(accX < -2 && gyroY < -2){
+            startActivity(intent2);
+            accX = 0;
+            gyroY = 0;
+        }
+        else if(accY > 5 && gyroX < -2){
+            startActivity(intent3);
+            accY = 0;
+            gyroX = 0;
+        }
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+}
